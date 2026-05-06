@@ -1,0 +1,6 @@
+infra.json
+deployment-*-files.zip
+node_modules/
+.DS_Store
+*.db
+*.db-journal

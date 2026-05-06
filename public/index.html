@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="dark" />
+  <title>spawned waitlist</title>
+  <meta name="description" content="Join the spawned waitlist." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='14' font-size='14'%3E%E2%98%81%EF%B8%8F%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <canvas id="clouds" aria-hidden="true"></canvas>
+
+  <main>
+    <form id="signup" novalidate>
+      <label for="email" class="sr-only">email address</label>
+      <div class="row">
+        <input
+          id="email"
+          name="email"
+          type="email"
+          inputmode="email"
+          autocomplete="email"
+          autocapitalize="off"
+          spellcheck="false"
+          required
+          placeholder="your@email.com"
+        />
+        <button id="submit" type="submit" aria-label="join waitlist">
+          <span class="label">join</span>
+          <span class="arrow" aria-hidden="true">→</span>
+        </button>
+      </div>
+      <p id="status" class="status" aria-live="polite"></p>
+    </form>
+  </main>
+
+  <script src="/app.js" defer></script>
+</body>
+</html>
