@@ -4,6 +4,7 @@ import { dirname } from "node:path";
 
 const PORT = Number(process.env.PORT ?? 3000);
 const DB_PATH = process.env.DB_PATH ?? "./waitlist.db";
+const LIST_TOKEN = process.env.LIST_TOKEN ?? "";
 
 mkdirSync(dirname(DB_PATH), { recursive: true });
 
@@ -22,6 +23,16 @@ const insert = db.prepare(
   "INSERT OR IGNORE INTO signups (email, created_at, user_agent, ip) VALUES (?, ?, ?, ?)"
 );
 const count = db.prepare("SELECT COUNT(*) as n FROM signups");
+const listAll = db.prepare(
+  "SELECT email, created_at, user_agent, ip FROM signups ORDER BY created_at ASC"
+);
+
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -78,6 +89,16 @@ Bun.serve({
     if (req.method === "GET" && url.pathname === "/api/count") {
       const row = count.get() as { n: number };
       return Response.json({ count: row.n });
+    }
+
+    if (req.method === "GET" && url.pathname === "/api/list") {
+      const auth = req.headers.get("authorization") ?? "";
+      const provided = auth.startsWith("Bearer ") ? auth.slice(7) : "";
+      if (!LIST_TOKEN || !provided || !timingSafeEqual(provided, LIST_TOKEN)) {
+        return new Response("not found", { status: 404 });
+      }
+      const rows = listAll.all();
+      return Response.json({ count: rows.length, rows });
     }
 
     return new Response("not found", { status: 404 });
