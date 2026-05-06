@@ -125,16 +125,18 @@ function createEngine(w, h, cellSize, seed = 0, opts = {}) {
   const prevGrid = new Float32Array(cols * rows);
 
   const arcs = [
-    curved(w, h, 0.6, -0.05),
-    curved(w, h, 0.5, 0.02),
-    flat(w, h, 0.18),
-    flat(w, h, 0.32),
-    flat(w, h, 0.78),
-    flat(w, h, 0.9),
+    flat(w, h, 0.08, 0.04),
+    flat(w, h, 0.22, 0.05),
+    flat(w, h, 0.36, 0.04),
+    flat(w, h, 0.5, 0.05),
+    flat(w, h, 0.64, 0.04),
+    flat(w, h, 0.78, 0.05),
+    flat(w, h, 0.92, 0.04),
   ];
   const sm = 0.2;
   const count = opts.count ?? 10;
-  const spdMin = 0.004, spdMax = 0.025;
+  const speedMul = opts.speedMul ?? 1;
+  const spdMin = 0.004 * speedMul, spdMax = 0.025 * speedMul;
   const sclMin = 0.8, sclMax = 1.1;
   const driftMin = 1, driftMax = 6;
   const thLo = 0.25, thHi = 0.55;
@@ -192,7 +194,7 @@ function createEngine(w, h, cellSize, seed = 0, opts = {}) {
   for (let i = 0; i < count; i++) {
     const t = 0.05 + hash2d(i + seed, 20, 42) * 0.85;
     const cloud = spawn(t);
-    cloud.arcIdx = Math.floor(hash2d(i + seed, 14, 99) * arcs.length);
+    cloud.arcIdx = i % arcs.length;
     clouds.push(cloud);
   }
 
@@ -273,8 +275,9 @@ function createEngine(w, h, cellSize, seed = 0, opts = {}) {
     canvas.height = Math.round(h * dpr);
     const isMobile = w < 720;
     const cellSize = isMobile ? 11 : 14;
-    const count = isMobile ? 7 : 12;
-    engine = createEngine(w, h, cellSize, 123, { count });
+    const count = isMobile ? 14 : 14;
+    const speedMul = isMobile ? 3.2 : 1;
+    engine = createEngine(w, h, cellSize, 123, { count, speedMul });
     startTime = performance.now() / 1000;
     lastTime = startTime;
   }
@@ -291,16 +294,20 @@ function createEngine(w, h, cellSize, seed = 0, opts = {}) {
   }
 
   setup();
+  let lastW = w;
   raf = requestAnimationFrame(frame);
 
   let resizeTimer = 0;
   window.addEventListener("resize", () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
+      const newW = canvas.getBoundingClientRect().width;
+      if (Math.abs(newW - lastW) < 8) return;
       cancelAnimationFrame(raf);
       setup();
+      lastW = w;
       raf = requestAnimationFrame(frame);
-    }, 150);
+    }, 200);
   });
 })();
 
